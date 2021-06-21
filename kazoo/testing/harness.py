@@ -70,6 +70,17 @@ def get_global_cluster():
             "-Dzookeeper.DigestAuthenticationProvider.superDigest="
             "super:D/InIHSb7yEEbrWz8b9l71RjZJU="
         ]
+        if ZK_VERSION >= (3, 5, 4):
+            # Enable container and TTL node features.
+            # NOTE: TTL nodes were introduced in 3.5.3, but had a bug that makes TTL nodes created in 3.5.3
+            # incompatible with newer zk. There is a separate property "zookeeper.emulate353TTLNodes" that
+            # needs to be set for 3.5.4 and 3.6.0 for them to work somehow. The easy solution is to not use
+            # them in zk 3.5.3.
+            additional_java_system_properties.extend([
+                "-Dzookeeper.extendedTypesEnabled=true",
+                "-Dznode.container.checkIntervalMs=1000",  # very low for testing purposes
+                "-Dznode.container.maxPerMinute=50000",
+            ])
     else:
         additional_configuration_entries = []
         additional_java_system_properties = []
